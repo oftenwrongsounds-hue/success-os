@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CTRL/ALT/DEFEAT">
+<meta name="theme-color" content="#0a0a0f">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<title>CTRL/ALT/DEFEAT</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#0a0a0f;
+  --bg1:#111118;
+  --bg2:#1a1a24;
+  --bg3:#22222f;
+  --bg4:#2a2a3a;
+  --gold:#c9a84c;
+  --gold2:#e8c97a;
+  --gold-dim:#6b5a2a;
+  --cyan:#4ecdc4;
+  --cyan-dim:#1a4a48;
+  --red:#e8463a;
+  --red-dim:#4a1a18;
+  --purple:#8b7fe8;
+  --purple-dim:#2a2560;
+  --green:#5cb85c;
+  --green-dim:#1a3a1a;
+  --text:#f0ede8;
+  --text2:#9a9790;
+  --text3:#4a4a5a;
+  --border:rgba(255,255,255,0.06);
+  --border2:rgba(255,255,255,0.12);
+  --gold-border:rgba(201,168,76,0.3);
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --font:'Space Grotesk',sans-serif;
+  --mono:'Space Mono',monospace;
+}
+html,body{height:100%;overflow:hidden;font-family:var(--font);background:var(--bg);color:var(--text)}
+
+/* ── BOOT SCREEN ── */
+#boot{position:absolute;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .8s}
+#boot.hidden{opacity:0;pointer-events:none}
+.boot-logo{font-family:var(--mono);font-size:11px;color:var(--gold-dim);letter-spacing:.15em;text-align:center;line-height:1.8;margin-bottom:32px}
+.boot-name{font-size:22px;font-weight:700;color:var(--gold);letter-spacing:.2em;margin-bottom:4px}
+.boot-sub{font-size:11px;color:var(--text3);letter-spacing:.3em}
+.boot-bar-track{width:200px;height:2px;background:var(--bg3);border-radius:1px;margin-top:40px;overflow:hidden}
+.boot-bar-fill{height:100%;background:var(--gold);border-radius:1px;width:0%;transition:width .05s linear}
+.boot-status{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:12px;letter-spacing:.1em}
+
+/* ── APP SHELL ── */
+.app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;background:var(--bg);position:relative;overflow:hidden}
+
+/* ── HEADER ── */
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:calc(var(--safe-top) + 12px) 20px 10px;flex-shrink:0;border-bottom:0.5px solid var(--border)}
+.hdr-logo{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--gold);letter-spacing:.15em}
+.hdr-score{display:flex;align-items:center;gap:8px}
+.score-ring{width:36px;height:36px;position:relative;cursor:pointer}
+.score-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.score-ring-bg{fill:none;stroke:var(--bg3);stroke-width:3}
+.score-ring-fill{fill:none;stroke:var(--gold);stroke-width:3;stroke-linecap:round;stroke-dasharray:100;stroke-dashoffset:100;transition:stroke-dashoffset 1s ease}
+.score-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:700;color:var(--gold)}
+.hdr-time{font-family:var(--mono);font-size:11px;color:var(--text3)}
+
+/* ── MAIN VIEWS ── */
+.view{display:none;flex-direction:column;flex:1;overflow:hidden}
+.view.active{display:flex}
+.scroll{flex:1;overflow-y:auto;padding:0 20px calc(80px + var(--safe-bottom));scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{display:none}
+
+/* ── HOME / CYPHER ── */
+.cypher-greeting{padding:24px 0 16px}
+.cypher-time-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.15em;margin-bottom:8px}
+.cypher-name{font-size:32px;font-weight:700;color:var(--text);line-height:1.1;margin-bottom:4px}
+.cypher-name span{color:var(--gold)}
+.cypher-pulse{width:8px;height:8px;border-radius:4px;background:var(--green);display:inline-block;margin-right:6px;animation:pulse-glow 2s ease-in-out infinite}
+@keyframes pulse-glow{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(0.8)}}
+
+.cypher-card{background:var(--bg1);border:0.5px solid var(--gold-border);border-radius:20px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden}
+.cypher-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.4}
+.cypher-mode-badge{font-family:var(--mono);font-size:9px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.mode-ignite{color:var(--green)}
+.mode-realign{color:var(--gold)}
+.mode-recovery{color:var(--purple)}
+.mode-brief{color:var(--cyan)}
+.cypher-message{font-size:15px;line-height:1.65;color:var(--text);font-weight:400}
+.cypher-action{display:flex;gap:8px;margin-top:16px}
+.cypher-btn{flex:1;padding:11px;border-radius:12px;border:0.5px solid var(--border2);background:var(--bg2);font-family:var(--font);font-size:13px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s;text-align:center}
+.cypher-btn:active{transform:scale(.97);background:var(--bg3)}
+.cypher-btn.primary{background:var(--gold);color:var(--bg);border-color:var(--gold);font-weight:600}
+.cypher-btn.primary:active{background:var(--gold2)}
+
+/* CAPTURE BAR */
+.capture-wrap{padding:0 0 12px}
+.capture-bar{display:flex;gap:8px;align-items:center;background:var(--bg1);border:0.5px solid var(--border2);border-radius:16px;padding:4px 4px 4px 16px}
+.capture-input{flex:1;background:transparent;border:none;outline:none;font-family:var(--font);font-size:14px;color:var(--text);padding:8px 0}
+.capture-input::placeholder{color:var(--text3)}
+.capture-send{width:38px;height:38px;border-radius:12px;background:var(--gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.capture-send:active{transform:scale(.95)}
+.capture-send i{font-size:18px;color:var(--bg)}
+
+/* QUICK ACTIONS */
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.quick-btn{background:var(--bg1);border:0.5px solid var(--border);border-radius:14px;padding:12px 6px;text-align:center;cursor:pointer;transition:all .15s}
+.quick-btn:active{transform:scale(.95);background:var(--bg2)}
+.quick-btn i{font-size:20px;color:var(--gold);display:block;margin-bottom:4px}
+.quick-btn span{font-size:10px;color:var(--text3);font-weight:500}
+
+/* STAT STRIP */
+.stat-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.stat-cell{background:var(--bg1);border:0.5px solid var(--border);border-radius:14px;padding:12px;text-align:center}
+.stat-val{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--text)}
+.stat-lbl{font-size:10px;color:var(--text3);margin-top:3px}
+
+/* WORKSPACE CARDS */
+.workspace-row{display:flex;gap:10px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.workspace-row::-webkit-scrollbar{display:none}
+.ws-card{flex-shrink:0;width:140px;background:var(--bg1);border:0.5px solid var(--border);border-radius:16px;padding:14px;cursor:pointer;transition:all .2s}
+.ws-card:active{transform:scale(.97)}
+.ws-card.boxboyz{border-color:rgba(78,205,196,.2)}
+.ws-card.music{border-color:rgba(139,127,232,.2)}
+.ws-card.personal{border-color:rgba(201,168,76,.2)}
+.ws-icon{font-size:22px;margin-bottom:8px}
+.ws-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px}
+.ws-count{font-size:10px;color:var(--text3)}
+
+/* SECTION LABEL */
+.sec-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:var(--text3);text-transform:uppercase;margin:18px 0 10px}
+
+/* ── CYPHER CHAT ── */
+.chat-messages{display:flex;flex-direction:column;gap:12px;padding:16px 0}
+.msg{max-width:88%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.6}
+.msg.cypher{background:var(--bg1);border:0.5px solid var(--gold-border);border-bottom-left-radius:4px;color:var(--text);align-self:flex-start}
+.msg.cypher .msg-name{font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:.1em;margin-bottom:6px}
+.msg.user{background:var(--gold);color:var(--bg);border-bottom-right-radius:4px;align-self:flex-end;font-weight:500}
+.msg.system{background:var(--bg2);border:0.5px solid var(--border);color:var(--text2);font-size:12px;align-self:center;text-align:center;border-radius:10px}
+.typing-dots{display:flex;gap:4px;padding:4px 0}
+.typing-dots span{width:6px;height:6px;border-radius:3px;background:var(--gold-dim);animation:typing 1.2s ease-in-out infinite}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes typing{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+
+.chat-input-wrap{padding:8px 20px calc(8px + var(--safe-bottom));border-top:0.5px solid var(--border);flex-shrink:0;background:var(--bg)}
+.chat-input-row{display:flex;gap:8px;align-items:flex-end}
+.chat-input{flex:1;background:var(--bg1);border:0.5px solid var(--border2);border-radius:16px;padding:10px 14px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;resize:none;max-height:100px;line-height:1.4}
+.chat-input::placeholder{color:var(--text3)}
+.chat-send{width:40px;height:40px;border-radius:12px;background:var(--gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.chat-send:active{transform:scale(.95);background:var(--gold2)}
+.chat-send i{font-size:18px;color:var(--bg)}
+
+/* PLAN OUTPUT */
+.plan-card{background:var(--bg1);border:0.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:10px}
+.plan-type{font-family:var(--mono);font-size:9px;letter-spacing:.15em;color:var(--cyan);text-transform:uppercase;margin-bottom:10px}
+.plan-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:12px}
+.plan-item{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;padding-bottom:10px;border-bottom:0.5px solid var(--border)}
+.plan-item:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.plan-num{font-family:var(--mono);font-size:12px;color:var(--gold);font-weight:700;flex-shrink:0;width:20px;margin-top:2px}
+.plan-text{font-size:14px;color:var(--text);line-height:1.5;flex:1}
+.plan-check{width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;margin-top:2px}
+.plan-check.done{background:var(--green);border-color:var(--green)}
+
+/* ── WORKSPACES ── */
+.ws-header{padding:20px 0 10px;display:flex;align-items:center;gap:12px}
+.ws-header-icon{font-size:28px}
+.ws-header-title{font-size:24px;font-weight:700;color:var(--text)}
+.ws-header-sub{font-size:12px;color:var(--text3);margin-top:2px}
+
+.task-item{display:flex;align-items:center;gap:10px;padding:13px 14px;background:var(--bg1);border:0.5px solid var(--border);border-radius:14px;margin-bottom:7px;transition:all .2s}
+.task-circle{width:22px;height:22px;border-radius:11px;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s}
+.task-circle.done{background:var(--green);border-color:var(--green)}
+.task-text{flex:1;font-size:14px;color:var(--text);line-height:1.3}
+.task-text.done{text-decoration:line-through;color:var(--text3)}
+.task-tag{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:500;flex-shrink:0}
+.tag-urgent{background:var(--red-dim);color:var(--red)}
+.tag-today{background:var(--gold-dim);color:var(--gold)}
+.tag-later{background:var(--bg3);color:var(--text3)}
+.del-btn{font-size:18px;color:var(--text3);cursor:pointer;padding:2px 4px;background:none;border:none;line-height:1}
+
+.add-task-bar{display:flex;gap:8px;margin-bottom:12px}
+.add-task-inp{flex:1;background:var(--bg1);border:0.5px solid var(--border2);border-radius:14px;padding:11px 14px;font-family:var(--font);font-size:14px;color:var(--text);outline:none}
+.add-task-inp::placeholder{color:var(--text3)}
+.add-task-btn{width:44px;height:44px;border-radius:14px;background:var(--gold);border:none;cursor:pointer;color:var(--bg);font-size:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+/* ── NOTES ── */
+.note-card{background:var(--bg1);border:0.5px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px;cursor:pointer;transition:all .2s}
+.note-card:active{transform:scale(.99)}
+.note-ws-badge{font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:8px}
+.badge-boxboyz{background:var(--cyan-dim);color:var(--cyan)}
+.badge-music{background:var(--purple-dim);color:var(--purple)}
+.badge-personal{background:var(--gold-dim);color:var(--gold)}
+.badge-general{background:var(--bg3);color:var(--text3)}
+.note-text{font-size:14px;color:var(--text);line-height:1.5;margin-bottom:8px}
+.note-time{font-family:var(--mono);font-size:10px;color:var(--text3)}
+
+/* ── TIMERS & REMINDERS ── */
+.timer-display{text-align:center;padding:30px 0 20px}
+.timer-time{font-family:var(--mono);font-size:56px;font-weight:700;color:var(--gold);letter-spacing:.05em}
+.timer-label{font-size:13px;color:var(--text3);margin-top:8px}
+.timer-btns{display:flex;gap:10px;justify-content:center;margin-top:20px}
+.timer-btn{padding:12px 28px;border-radius:14px;border:0.5px solid var(--border2);background:var(--bg2);font-family:var(--font);font-size:14px;font-weight:500;color:var(--text);cursor:pointer;transition:all .15s}
+.timer-btn.start{background:var(--green);border-color:var(--green);color:var(--bg)}
+.timer-btn.stop{background:var(--red);border-color:var(--red);color:#fff}
+
+.preset-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.preset-btn{background:var(--bg1);border:0.5px solid var(--border);border-radius:12px;padding:10px 4px;text-align:center;cursor:pointer;font-size:12px;color:var(--text2);transition:all .15s}
+.preset-btn:active{background:var(--bg3);transform:scale(.97)}
+
+.reminder-item{display:flex;align-items:center;gap:12px;padding:13px 14px;background:var(--bg1);border:0.5px solid var(--border);border-radius:14px;margin-bottom:7px}
+.reminder-icon{width:36px;height:36px;border-radius:10px;background:var(--gold-dim);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.reminder-icon i{font-size:16px;color:var(--gold)}
+.reminder-content{flex:1}
+.reminder-text{font-size:14px;color:var(--text)}
+.reminder-time{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:2px}
+
+/* ── LIFE SCORE ── */
+.score-view{padding:20px 0}
+.score-big{text-align:center;margin-bottom:30px}
+.score-ring-big{width:140px;height:140px;margin:0 auto 16px;position:relative}
+.score-ring-big svg{width:100%;height:100%;transform:rotate(-90deg)}
+.score-num-big{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-val{font-family:var(--mono);font-size:36px;font-weight:700;color:var(--gold)}
+.score-max{font-size:11px;color:var(--text3)}
+.score-breakdown{display:flex;flex-direction:column;gap:10px}
+.score-row{display:flex;align-items:center;gap:12px}
+.score-row-lbl{font-size:13px;color:var(--text2);width:120px;flex-shrink:0}
+.score-row-bar{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.score-row-fill{height:100%;border-radius:3px;transition:width .8s ease}
+.score-row-val{font-family:var(--mono);font-size:11px;color:var(--text3);width:30px;text-align:right;flex-shrink:0}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{display:flex;border-top:0.5px solid var(--border);padding:6px 0 calc(6px + var(--safe-bottom));background:var(--bg);flex-shrink:0}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 0;transition:all .2s;position:relative}
+.nav-item i{font-size:22px;color:var(--text3);transition:all .2s}
+.nav-item span{font-size:9px;color:var(--text3);font-weight:500;letter-spacing:.05em;transition:all .2s}
+.nav-item.active i{color:var(--gold)}
+.nav-item.active span{color:var(--gold)}
+.nav-badge{position:absolute;top:4px;right:calc(50% - 18px);width:8px;height:8px;border-radius:4px;background:var(--red);border:1.5px solid var(--bg)}
+
+/* ── MODALS ── */
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:flex-end;z-index:500;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg1);border-radius:24px 24px 0 0;padding:20px;width:100%;border-top:0.5px solid var(--gold-border);transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-height:80vh;overflow-y:auto}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-handle{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 20px}
+.modal-title{font-size:18px;font-weight:600;color:var(--text);margin-bottom:16px}
+.modal-input{width:100%;background:var(--bg2);border:0.5px solid var(--border2);border-radius:14px;padding:13px 16px;font-family:var(--font);font-size:15px;color:var(--text);outline:none;margin-bottom:10px}
+.modal-input::placeholder{color:var(--text3)}
+.modal-btn{width:100%;padding:14px;border-radius:14px;background:var(--gold);border:none;font-family:var(--font);font-size:15px;font-weight:600;color:var(--bg);cursor:pointer;margin-top:4px;transition:all .15s}
+.modal-btn:active{transform:scale(.98)}
+.modal-btn.secondary{background:var(--bg2);color:var(--text);border:0.5px solid var(--border2);margin-top:8px}
+.type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.type-btn{padding:12px 4px;border-radius:12px;border:0.5px solid var(--border);background:var(--bg2);font-family:var(--font);font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;text-align:center;transition:all .15s}
+.type-btn.active{border-color:var(--gold);color:var(--gold);background:var(--gold-dim)}
+
+/* MUSIC FLOW RITUAL */
+.ritual-step{display:flex;gap:12px;align-items:flex-start;padding:14px;background:var(--bg2);border-radius:14px;margin-bottom:8px;border:0.5px solid var(--border)}
+.ritual-step-num{font-family:var(--mono);font-size:14px;color:var(--gold);font-weight:700;width:24px;flex-shrink:0;margin-top:2px}
+.ritual-step-text{font-size:14px;color:var(--text);line-height:1.5;flex:1}
+.ritual-step-time{font-family:var(--mono);font-size:11px;color:var(--text3);margin-top:4px}
+
+/* SETTINGS */
+.settings-section{margin-bottom:24px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:14px;background:var(--bg1);border-radius:14px;margin-bottom:6px;cursor:pointer}
+.settings-row-left{display:flex;align-items:center;gap:12px}
+.settings-row-icon{width:36px;height:36px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center}
+.settings-row-icon i{font-size:18px;color:var(--gold)}
+.settings-row-label{font-size:14px;color:var(--text);font-weight:500}
+.settings-row-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.settings-row-right{font-size:13px;color:var(--text3)}
+.settings-inp{width:100%;background:var(--bg2);border:0.5px solid var(--border2);border-radius:12px;padding:11px 14px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;margin-top:8px}
+.settings-inp::placeholder{color:var(--text3)}
+
+/* MISC */
+.empty-state{text-align:center;padding:40px 20px;color:var(--text3);font-size:14px}
+.empty-state i{font-size:40px;display:block;margin-bottom:12px;color:var(--bg3)}
+.tag-pill{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:500;cursor:pointer;transition:all .15s}
+.pill-all{background:var(--bg3);color:var(--text2)}
+.pill-all.active{background:var(--gold-dim);color:var(--gold)}
+.pill-boxboyz{background:var(--cyan-dim);color:var(--cyan)}
+.pill-music{background:var(--purple-dim);color:var(--purple)}
+.pill-personal{background:var(--gold-dim);color:var(--gold)}
+.filter-row{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.filter-row::-webkit-scrollbar{display:none}
+
+.session-card{background:var(--bg1);border:0.5px solid var(--purple-dim);border-radius:16px;padding:16px;margin-bottom:10px}
+.session-card-hdr{display:flex;justify-content:space-between;margin-bottom:10px}
+.session-date{font-family:var(--mono);font-size:10px;color:var(--text3)}
+.session-mood{font-size:18px}
+.session-note{font-size:14px;color:var(--text);line-height:1.5}
+
+.cta-row{display:flex;gap:8px;margin-top:10px}
+.cta-full{width:100%;padding:13px;border-radius:14px;background:var(--gold);border:none;font-family:var(--font);font-size:14px;font-weight:600;color:var(--bg);cursor:pointer;transition:all .15s}
+.cta-full:active{transform:scale(.98)}
+.cta-ghost{background:var(--bg2);color:var(--text);border:0.5px solid var(--border2)}
+
+.notification{position:absolute;top:calc(var(--safe-top) + 70px);left:20px;right:20px;background:var(--bg1);border:0.5px solid var(--gold-border);border-radius:16px;padding:14px 16px;z-index:600;transform:translateY(-20px);opacity:0;transition:all .3s;pointer-events:none}
+.notification.show{transform:translateY(0);opacity:1}
+.notif-title{font-size:13px;font-weight:600;color:var(--gold);margin-bottom:4px}
+.notif-body{font-size:13px;color:var(--text2)}
+</style>
+</head>
+<body>
+
+<!-- BOOT SCREEN -->
+<div id="boot">
+  <div class="boot-logo">
+    <div style="color:var(--gold);font-size:14px;letter-spacing:.3em;margin-bottom:12px">◈ ◈ ◈</div>
+    <div class="boot-name">CTRL/ALT/DEFEAT</div>
+    <div class="boot-sub">LIFE OPERATING SYSTEM</div>
+  </div>
+  <div style="font-family:var(--mono);font-size:10px;color:var(--text3);text-align:center;line-height:2">
+    CYPHER INTELLIGENCE v2.0<br>
+    INITIALIZING SYSTEMS
+  </div>
+  <div class="boot-bar-track"><div class="boot-bar-fill" id="boot-bar"></div></div>
+  <div class="boot-status" id="boot-status">loading profile...</div>
+</div>
+
+<!-- APP -->
+<div class="app" id="app" style="display:none">
+
+  <!-- HEADER -->
+  <div class="hdr">
+    <div class="hdr-logo">C/A/D</div>
+    <div class="hdr-score">
+      <div class="hdr-time" id="hdr-clock">--:--</div>
+      <div class="score-ring" onclick="showView('score')" title="Life Score">
+        <svg viewBox="0 0 36 36">
+          <circle class="score-ring-bg" cx="18" cy="18" r="15.9"/>
+          <circle class="score-ring-fill" id="score-ring-fill" cx="18" cy="18" r="15.9"/>
+        </svg>
+        <div class="score-num" id="score-ring-num">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOME VIEW -->
+  <div class="view active" id="view-home">
+    <div class="scroll">
+      <div class="cypher-greeting">
+        <div class="cypher-time-label" id="home-time-label">GOOD MORNING</div>
+        <div class="cypher-name"><span class="cypher-pulse"></span>Cypher <span>is online</span></div>
+      </div>
+
+      <!-- CYPHER BRIEF CARD -->
+      <div class="cypher-card" id="cypher-brief-card">
+        <div class="cypher-mode-badge mode-brief" id="brief-mode-label">
+          <i class="ti ti-brain" style="font-size:12px" aria-hidden="true"></i>
+          DAILY BRIEF
+        </div>
+        <div class="cypher-message" id="brief-message">Analyzing your patterns...</div>
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <button class="cypher-btn primary" onclick="showView('cypher')">Talk to Cypher</button>
+          <button class="cypher-btn" onclick="showView('score')">Life Score</button>
+        </div>
+      </div>
+
+      <!-- QUICK ACTIONS -->
+      <div class="sec-lbl">Quick actions</div>
+      <div class="quick-grid">
+        <div class="quick-btn" onclick="openModal('timer')">
+          <i class="ti ti-clock" aria-hidden="true"></i>
+          <span>Timer</span>
+        </div>
+        <div class="quick-btn" onclick="openModal('reminder')">
+          <i class="ti ti-bell" aria-hidden="true"></i>
+          <span>Remind</span>
+        </div>
+        <div class="quick-btn" onclick="openModal('capture')">
+          <i class="ti ti-pencil" aria-hidden="true"></i>
+          <span>Capture</span>
+        </div>
+        <div class="quick-btn" onclick="showView('music')">
+          <i class="ti ti-music" aria-hidden="true"></i>
+          <span>Flow</span>
+        </div>
+      </div>
+
+      <!-- CAPTURE BAR -->
+      <div class="capture-wrap">
+        <div class="capture-bar">
+          <input class="capture-input" id="home-capture" placeholder="Tell Cypher anything..." onkeydown="if(event.key==='Enter'){quickCapture();this.blur()}">
+          <button class="capture-send" onclick="quickCapture()" aria-label="Send">
+            <i class="ti ti-arrow-up" aria-hidden="true"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- STATS -->
+      <div class="stat-strip">
+        <div class="stat-cell">
+          <div class="stat-val" id="stat-streak">0</div>
+          <div class="stat-lbl">day streak</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val" id="stat-tasks">0</div>
+          <div class="stat-lbl">done today</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-val" id="stat-notes">0</div>
+          <div class="stat-lbl">notes saved</div>
+        </div>
+      </div>
+
+      <!-- WORKSPACES -->
+      <div class="sec-lbl">Workspaces</div>
+      <div class="workspace-row">
+        <div class="ws-card boxboyz" onclick="showView('boxboyz')">
+          <div class="ws-icon">📦</div>
+          <div class="ws-name">BoxBoyz</div>
+          <div class="ws-count" id="ws-bb-count">0 tasks</div>
+        </div>
+        <div class="ws-card music" onclick="showView('music')">
+          <div class="ws-icon">🎵</div>
+          <div class="ws-name">Music</div>
+          <div class="ws-count" id="ws-music-count">0 sessions</div>
+        </div>
+        <div class="ws-card personal" onclick="showView('personal')">
+          <div class="ws-icon">⚡</div>
+          <div class="ws-name">Personal</div>
+          <div class="ws-count" id="ws-personal-count">0 tasks</div>
+        </div>
+      </div>
+
+      <!-- REMINDERS DUE -->
+      <div id="reminders-due-section" style="display:none">
+        <div class="sec-lbl">Due soon</div>
+        <div id="reminders-due-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CYPHER CHAT VIEW -->
+  <div class="view" id="view-cypher">
+    <div class="scroll" id="chat-scroll">
+      <div class="chat-messages" id="chat-messages"></div>
+    </div>
+
+    <!-- TEXT MODE INPUT -->
+    <div class="chat-input-wrap" id="text-input-wrap">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;padding:0 2px">
+        <span style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.08em">TEXT MODE</span>
+        <button onclick="toggleVoiceMode()" id="voice-toggle-btn" aria-label="Switch to voice mode" style="display:flex;align-items:center;gap:5px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:5px 10px;cursor:pointer;transition:all .2s">
+          <i class="ti ti-microphone" style="font-size:14px;color:var(--text3)" aria-hidden="true"></i>
+          <span style="font-size:11px;color:var(--text3);font-family:var(--mono)">VOICE</span>
+        </button>
+      </div>
+      <div class="chat-input-row">
+        <textarea class="chat-input" id="chat-input" placeholder="Ask Cypher anything..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}" oninput="autoResize(this)"></textarea>
+        <button class="chat-send" onclick="sendChat()" aria-label="Send">
+          <i class="ti ti-arrow-up" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- VOICE MODE INPUT -->
+    <div id="voice-input-wrap" style="display:none;padding:12px 20px calc(12px + var(--safe-bottom));border-top:0.5px solid var(--border);background:var(--bg)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="width:7px;height:7px;border-radius:50%;background:var(--gold);animation:pulse-glow 1.5s ease-in-out infinite"></div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:.1em">VOICE MODE</span>
+        </div>
+        <button onclick="toggleVoiceMode()" style="display:flex;align-items:center;gap:5px;background:var(--bg2);border:0.5px solid var(--border2);border-radius:10px;padding:5px 10px;cursor:pointer">
+          <i class="ti ti-keyboard" style="font-size:14px;color:var(--text2)" aria-hidden="true"></i>
+          <span style="font-size:11px;color:var(--text2);font-family:var(--mono)">TEXT</span>
+        </button>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:10px">
+        <button id="mic-btn" aria-label="Hold to speak"
+          ontouchstart="startRecording(event)" ontouchend="stopRecording(event)"
+          onmousedown="startRecording(event)" onmouseup="stopRecording(event)"
+          style="width:72px;height:72px;border-radius:36px;background:var(--bg2);border:2px solid var(--border2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .25s;flex-shrink:0">
+          <i class="ti ti-microphone" style="font-size:28px;color:var(--text3)" id="mic-icon" aria-hidden="true"></i>
+        </button>
+        <div id="mic-status" style="font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:.08em">HOLD TO SPEAK</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOXBOYZ VIEW -->
+  <div class="view" id="view-boxboyz">
+    <div class="scroll">
+      <div class="ws-header">
+        <div class="ws-header-icon">📦</div>
+        <div>
+          <div class="ws-header-title">BoxBoyz</div>
+          <div class="ws-header-sub">Brand operations & decisions</div>
+        </div>
+      </div>
+      <div class="add-task-bar">
+        <input class="add-task-inp" id="bb-task-inp" placeholder="Add task or decision..." maxlength="100" onkeydown="if(event.key==='Enter'){addTask('boxboyz');this.blur()}">
+        <button class="add-task-btn" onclick="addTask('boxboyz')" aria-label="Add"><i class="ti ti-plus" aria-hidden="true"></i></button>
+      </div>
+      <div class="filter-row">
+        <span class="tag-pill pill-all active" id="bb-filter-all" onclick="filterTasks('boxboyz','all')">All</span>
+        <span class="tag-pill" style="background:var(--red-dim);color:var(--red)" id="bb-filter-urgent" onclick="filterTasks('boxboyz','urgent')">Urgent</span>
+        <span class="tag-pill" style="background:var(--gold-dim);color:var(--gold)" id="bb-filter-today" onclick="filterTasks('boxboyz','today')">Today</span>
+      </div>
+      <div id="bb-task-list"></div>
+      <div class="sec-lbl" style="margin-top:20px">Notes & decisions</div>
+      <div id="bb-notes-list"></div>
+      <button class="cta-full" onclick="askCypherAbout('boxboyz')" style="margin-top:8px">Ask Cypher about BoxBoyz ↗</button>
+    </div>
+  </div>
+
+  <!-- MUSIC VIEW -->
+  <div class="view" id="view-music">
+    <div class="scroll">
+      <div class="ws-header">
+        <div class="ws-header-icon">🎵</div>
+        <div>
+          <div class="ws-header-title">Music</div>
+          <div class="ws-header-sub">Creative sessions & flow</div>
+        </div>
+      </div>
+
+      <div class="cypher-card" style="margin-bottom:14px">
+        <div class="cypher-mode-badge" style="color:var(--purple)">
+          <i class="ti ti-flame" style="font-size:12px" aria-hidden="true"></i>
+          FLOW STATE RITUAL
+        </div>
+        <div class="cypher-message" style="font-size:14px;margin-bottom:14px">Your custom pre-session ritual. Follow these steps before recording to prime your brain for flow.</div>
+        <div id="ritual-steps">
+          <div class="ritual-step"><div class="ritual-step-num">01</div><div><div class="ritual-step-text">Put your phone on Do Not Disturb. Close every non-music app. Signal to your brain that this time is sacred.</div><div class="ritual-step-time">1 min</div></div></div>
+          <div class="ritual-step"><div class="ritual-step-num">02</div><div><div class="ritual-step-text">Play one reference track that represents the energy you want to create. Listen fully, no distractions.</div><div class="ritual-step-time">3-4 min</div></div></div>
+          <div class="ritual-step"><div class="ritual-step-num">03</div><div><div class="ritual-step-text">Record a 60-second freestyle — anything. No judgment. This warms up your creative voice and breaks the blank-canvas fear.</div><div class="ritual-step-time">1 min</div></div></div>
+          <div class="ritual-step"><div class="ritual-step-num">04</div><div><div class="ritual-step-text">Set a timer for 25 minutes. Commit to not stopping until it goes off. Flow needs at least 15 minutes to settle in.</div><div class="ritual-step-time">Set now</div></div></div>
+        </div>
+        <button class="cta-full" onclick="startFlowSession()" style="margin-top:12px">Start flow session</button>
+      </div>
+
+      <div class="sec-lbl">Log a session</div>
+      <div class="card" style="background:var(--bg1);border:0.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px">
+        <textarea id="session-note-inp" placeholder="How was the session? What did you create? How did it feel?" style="width:100%;background:var(--bg2);border:0.5px solid var(--border);border-radius:12px;padding:12px;font-family:var(--font);font-size:14px;color:var(--text);outline:none;resize:none;min-height:80px;line-height:1.5" oninput="autoResize(this)"></textarea>
+        <div style="display:flex;gap:8px;margin:10px 0">
+          <button class="type-btn" id="mood-great" onclick="setMood('great')">🔥 Fire</button>
+          <button class="type-btn" id="mood-good" onclick="setMood('good')">✓ Good</button>
+          <button class="type-btn" id="mood-meh" onclick="setMood('meh')">〜 Meh</button>
+          <button class="type-btn" id="mood-block" onclick="setMood('block')">✗ Blocked</button>
+        </div>
+        <button class="cta-full" onclick="logSession()">Log session</button>
+      </div>
+
+      <div class="sec-lbl">Session history</div>
+      <div id="session-history"></div>
+      <button class="cta-full cta-ghost" onclick="askCypherAbout('music')" style="margin-top:8px">Ask Cypher about your music ↗</button>
+    </div>
+  </div>
+
+  <!-- PERSONAL VIEW -->
+  <div class="view" id="view-personal">
+    <div class="scroll">
+      <div class="ws-header">
+        <div class="ws-header-icon">⚡</div>
+        <div>
+          <div class="ws-header-title">Personal</div>
+          <div class="ws-header-sub">Life, habits & goals</div>
+        </div>
+      </div>
+      <div class="add-task-bar">
+        <input class="add-task-inp" id="personal-task-inp" placeholder="Add anything..." maxlength="100" onkeydown="if(event.key==='Enter'){addTask('personal');this.blur()}">
+        <button class="add-task-btn" onclick="addTask('personal')" aria-label="Add"><i class="ti ti-plus" aria-hidden="true"></i></button>
+      </div>
+      <div id="personal-task-list"></div>
+      <div class="sec-lbl" style="margin-top:20px">Notes</div>
+      <div id="personal-notes-list"></div>
+    </div>
+  </div>
+
+  <!-- NOTES VIEW -->
+  <div class="view" id="view-notes">
+    <div class="scroll">
+      <div style="padding:20px 0 10px;font-size:24px;font-weight:700;color:var(--text)">All notes</div>
+      <div class="filter-row">
+        <span class="tag-pill pill-all active" id="note-filter-all" onclick="filterNotes('all')">All</span>
+        <span class="tag-pill badge-boxboyz" onclick="filterNotes('boxboyz')">BoxBoyz</span>
+        <span class="tag-pill badge-music" onclick="filterNotes('music')">Music</span>
+        <span class="tag-pill badge-personal" onclick="filterNotes('personal')">Personal</span>
+        <span class="tag-pill" style="background:var(--bg3);color:var(--text2)" onclick="filterNotes('general')">General</span>
+      </div>
+      <div id="all-notes-list"></div>
+    </div>
+  </div>
+
+  <!-- LIFE SCORE VIEW -->
+  <div class="view" id="view-score">
+    <div class="scroll">
+      <div style="padding:20px 0 10px;font-size:24px;font-weight:700;color:var(--text)">Life score</div>
+      <div class="score-view">
+        <div class="score-big">
+          <div class="score-ring-big">
+            <svg viewBox="0 0 140 140">
+              <circle fill="none" stroke="var(--bg3)" stroke-width="8" cx="70" cy="70" r="58"/>
+              <circle fill="none" stroke="var(--gold)" stroke-width="8" cx="70" cy="70" r="58" stroke-linecap="round" id="score-big-ring" stroke-dasharray="364.4" stroke-dashoffset="364.4" style="transition:stroke-dashoffset 1.2s ease"/>
+            </svg>
+            <div class="score-num-big">
+              <div class="score-val" id="score-big-val">0</div>
+              <div class="score-max">/ 100</div>
+            </div>
+          </div>
+          <div style="font-size:14px;color:var(--text2)" id="score-label">Calculating...</div>
+        </div>
+        <div class="score-breakdown">
+          <div class="sec-lbl">Breakdown</div>
+          <div class="score-row"><div class="score-row-lbl">Consistency</div><div class="score-row-bar"><div class="score-row-fill" id="sb-consistency" style="background:var(--green);width:0%"></div></div><div class="score-row-val" id="sv-consistency">0</div></div>
+          <div class="score-row"><div class="score-row-lbl">Execution</div><div class="score-row-bar"><div class="score-row-fill" id="sb-execution" style="background:var(--cyan);width:0%"></div></div><div class="score-row-val" id="sv-execution">0</div></div>
+          <div class="score-row"><div class="score-row-lbl">Self-knowledge</div><div class="score-row-bar"><div class="score-row-fill" id="sb-self" style="background:var(--purple);width:0%"></div></div><div class="score-row-val" id="sv-self">0</div></div>
+          <div class="score-row"><div class="score-row-lbl">Creative flow</div><div class="score-row-bar"><div class="score-row-fill" id="sb-creative" style="background:var(--gold);width:0%"></div></div><div class="score-row-val" id="sv-creative">0</div></div>
+          <div class="score-row"><div class="score-row-lbl">Vision clarity</div><div class="score-row-bar"><div class="score-row-fill" id="sb-vision" style="background:var(--red);width:0%"></div></div><div class="score-row-val" id="sv-vision">0</div></div>
+        </div>
+        <button class="cta-full" onclick="showView('cypher');setTimeout(()=>triggerCypherScoreAnalysis(),400)" style="margin-top:20px">Ask Cypher to analyze my score ↗</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS VIEW -->
+  <div class="view" id="view-settings">
+    <div class="scroll">
+      <div style="padding:20px 0 10px;font-size:24px;font-weight:700;color:var(--text)">Settings</div>
+      <div class="settings-section">
+        <div class="sec-lbl">Cypher bridge</div>
+        <div style="background:var(--bg1);border-radius:16px;padding:16px;margin-bottom:6px">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+            <div id="bridge-status-dot" style="width:10px;height:10px;border-radius:5px;background:var(--text3);flex-shrink:0;transition:background .3s"></div>
+            <div>
+              <div style="font-size:14px;font-weight:500;color:var(--text)" id="bridge-status-label">Bridge offline</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:2px">Your PC running C:\cypher-bridge\start_cypher.bat</div>
+            </div>
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="font-size:12px;color:var(--text3);margin-bottom:5px">Bridge URL (Tailscale IP)</div>
+            <input class="settings-inp" type="text" id="bridge-url-inp" placeholder="http://100.x.x.x:7842" oninput="saveBridgeSettings()" style="margin-top:0">
+          </div>
+          <div style="margin-bottom:14px">
+            <div style="font-size:12px;color:var(--text3);margin-bottom:5px">Bridge token (your secret)</div>
+            <input class="settings-inp" type="password" id="bridge-token-inp" placeholder="your secret token from server.py" oninput="saveBridgeSettings()" style="margin-top:0">
+          </div>
+          <div style="display:flex;gap:8px">
+            <button onclick="testBridgeConnection()" style="flex:1;padding:11px;border-radius:12px;background:var(--bg3);border:0.5px solid var(--border2);font-family:var(--font);font-size:13px;color:var(--text);cursor:pointer">Test connection</button>
+            <button onclick="indexFiles()" style="flex:1;padding:11px;border-radius:12px;background:var(--gold);border:none;font-family:var(--font);font-size:13px;font-weight:600;color:var(--bg);cursor:pointer" id="index-btn">Index my files</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="sec-lbl">Cypher intelligence</div>
+        <div class="settings-row" onclick="toggleSection('api-section')">
+          <div class="settings-row-left">
+            <div class="settings-row-icon"><i class="ti ti-brain" aria-hidden="true"></i></div>
+            <div>
+              <div class="settings-row-label">Claude API key</div>
+              <div class="settings-row-sub">Powers Cypher's intelligence</div>
+            </div>
+          </div>
+          <i class="ti ti-chevron-right" style="color:var(--text3)" aria-hidden="true"></i>
+        </div>
+        <div id="api-section" style="display:none;padding:4px 0 8px">
+          <input class="settings-inp" type="password" id="api-key-setting" placeholder="sk-ant-..." oninput="saveApiKey()">
+          <div style="font-size:11px;color:var(--text3);margin-top:6px;padding:0 4px">Get a key at console.anthropic.com. ~$10/month budget covers all Cypher features.</div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="sec-lbl">About</div>
+        <div class="settings-row">
+          <div class="settings-row-left">
+            <div class="settings-row-icon"><i class="ti ti-info-circle" aria-hidden="true"></i></div>
+            <div>
+              <div class="settings-row-label">CTRL/ALT/DEFEAT</div>
+              <div class="settings-row-sub">Life OS v1.0 — Cypher Intelligence</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <div class="sec-lbl">Data</div>
+        <div class="settings-row" onclick="exportData()">
+          <div class="settings-row-left">
+            <div class="settings-row-icon"><i class="ti ti-download" aria-hidden="true"></i></div>
+            <div>
+              <div class="settings-row-label">Export all data</div>
+              <div class="settings-row-sub">Download your profile as JSON</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-home" onclick="showView('home')">
+      <i class="ti ti-home" aria-hidden="true"></i>
+      <span>Home</span>
+    </div>
+    <div class="nav-item" id="nav-cypher" onclick="showView('cypher')">
+      <i class="ti ti-message-circle" aria-hidden="true"></i>
+      <span>Cypher</span>
+    </div>
+    <div class="nav-item" id="nav-notes" onclick="showView('notes')">
+      <i class="ti ti-notebook" aria-hidden="true"></i>
+      <span>Notes</span>
+    </div>
+    <div class="nav-item" id="nav-score" onclick="showView('score')">
+      <i class="ti ti-chart-bar" aria-hidden="true"></i>
+      <span>Score</span>
+    </div>
+    <div class="nav-item" id="nav-settings" onclick="showView('settings')">
+      <i class="ti ti-settings" aria-hidden="true"></i>
+      <span>Settings</span>
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notification" id="notification">
+  <div class="notif-title" id="notif-title">Cypher</div>
+  <div class="notif-body" id="notif-body"></div>
+</div>
+
+<script>
+const VIEWS=['home','cypher','boxboyz','music','personal','notes','score','settings'];
+const NAV_VIEWS=['home','cypher','notes','score','settings'];
+
+let D={
+  profile:{name:'',streak:0,lastDate:'',streakHistory:[],chatHistory:[],synthResult:'',lastSynthesis:null},
+  tasks:{boxboyz:[],personal:[]},
+  notes:[],
+  sessions:[],
+  reminders:[],
+  timers:[],
+  score:{consistency:0,execution:0,self:0,creative:0,vision:0,total:0},
+  pq:{idx:0,ans:{}},
+  vision:{v1:'',v2:'',v3:'',v4:'',v5:''},
+  energy:[]
+};
+let currentMood=null;
+let timerInterval=null;
+let timerSeconds=0;
+let timerRunning=false;
+let noteFilter='all';
+let taskFilters={boxboyz:'all',personal:'all'};
+
+function persist(){try{localStorage.setItem('cad_v1',JSON.stringify(D));}catch(e){}}
+function hydrate(){try{const d=localStorage.getItem('cad_v1');if(d){const p=JSON.parse(d);if(p)D=Object.assign(D,p);}}catch(e){}}
+function getKey(){return localStorage.getItem('cad_apikey')||'';}
+function saveApiKey(){const k=document.getElementById('api-key-setting').value.trim();if(k)localStorage.setItem('cad_apikey',k);else localStorage.removeItem('cad_apikey');}
+
+/* ── BOOT ── */
+function boot(){
+  hydrate();
+  const bar=document.getElementById('boot-bar');
+  const status=document.getElementById('boot-status');
+  const steps=[
+    [10,'loading profile...'],
+    [30,'calibrating cypher...'],
+    [55,'reading your patterns...'],
+    [75,'building daily brief...'],
+    [90,'syncing workspaces...'],
+    [100,'ready.']
+  ];
+  let i=0;
+  const tick=()=>{
+    if(i>=steps.length){
+      setTimeout(()=>{
+        document.getElementById('boot').classList.add('hidden');
+        document.getElementById('app').style.display='flex';
+        setTimeout(()=>{document.getElementById('boot').style.display='none';},800);
+        initApp();
+      },400);
+      return;
+    }
+    bar.style.width=steps[i][0]+'%';
+    status.textContent=steps[i][1];
+    i++;
+    setTimeout(tick,steps[i-1][0]<55?300:200);
+  };
+  tick();
+}
+
+function initApp(){
+  updateClock();
+  setInterval(updateClock,30000);
+  checkStreak();
+  renderBrief();
+  updateStats();
+  calcScore();
+  setTimeout(()=>{
+    const s=D.score;
+    const ringFill=document.getElementById('score-ring-fill');
+    if(ringFill)ringFill.style.strokeDashoffset=100-(s.total);
+    const ringNum=document.getElementById('score-ring-num');
+    if(ringNum)ringNum.textContent=s.total;
+  },600);
+  renderAll();
+  checkReminders();
+  setInterval(checkReminders,60000);
+  const key=getKey();
+  if(key){const inp=document.getElementById('api-key-setting');if(inp)inp.value=key;}
+  loadBridgeSettings();
+  // Check bridge connection silently on load
+  if(getBridgeURL()&&getBridgeToken()){
+    setTimeout(async()=>{
+      try{
+        const res=await fetch(getBridgeURL()+'/ping',{headers:{'X-Cypher-Token':getBridgeToken()}});
+        if(res.ok){
+          const data=await res.json();
+          localStorage.setItem('cad_bridge_online','1');
+          const dot=document.getElementById('bridge-status-dot');
+          const lbl=document.getElementById('bridge-status-label');
+          if(dot)dot.style.background='var(--green)';
+          if(lbl)lbl.textContent='Connected \u2713 — '+data.files_indexed+' files indexed';
+        }
+      }catch(e){}
+    },2000);
+  }
+  if(D.profile.chatHistory.length===0){
+    addCypherMessage("Hey. I'm Cypher — your life operating system. I'm already learning how you work.\n\nTell me what's on your mind. A problem, a goal, an idea, anything. I'll give you something real to do with it.");
+  } else {
+    D.profile.chatHistory.slice(-10).forEach(m=>{
+      addMsgToDOM(m.role,m.content,false);
+    });
+  }
+}
+
+/* ── CLOCK & GREETING ── */
+function updateClock(){
+  const n=new Date(),h=n.getHours(),m=n.getMinutes();
+  const t=(h%12||12)+':'+(m<10?'0'+m:m)+' '+(h>=12?'PM':'AM');
+  document.getElementById('hdr-clock').textContent=t;
+  const lbl=document.getElementById('home-time-label');
+  if(lbl)lbl.textContent=h<12?'GOOD MORNING':h<17?'GOOD AFTERNOON':'GOOD EVENING';
+}
+
+/* ── VIEW NAVIGATION ── */
+function showView(id){
+  VIEWS.forEach(v=>{
+    const el=document.getElementById('view-'+v);
+    if(el)el.classList.remove('active');
+  });
+  NAV_VIEWS.forEach(v=>{
+    const el=document.getElementById('nav-'+v);
+    if(el)el.classList.remove('active');
+  });
+  const target=document.getElementById('view-'+id);
+  if(target)target.classList.add('active');
+  const navEl=document.getElementById('nav-'+id);
+  if(navEl)navEl.classList.add('active');
+  if(id==='home'){renderBrief();updateStats();}
+  if(id==='notes')renderAllNotes();
+  if(id==='score'){renderScore();animateScore();}
+  if(id==='boxboyz')renderTasks('boxboyz');
+  if(id==='personal')renderTasks('personal');
+  if(id==='music')renderMusicView();
+}
+
+/* ── STREAK ── */
+function checkStreak(){
+  const today=new Date().toDateString();
+  if(!D.profile.streakHistory)D.profile.streakHistory=[];
+  const interacted=D.notes.some(n=>n.date===today)||D.tasks.boxboyz.some(t=>t.done)||D.profile.chatHistory.length>0;
+  if(interacted&&!D.profile.streakHistory.includes(today)){
+    D.profile.streakHistory.push(today);
+    if(D.profile.lastDate!==today){
+      D.profile.streak=(D.profile.streak||0)+1;
+      D.profile.lastDate=today;
+      persist();
+    }
+  }
+}
+
+/* ── RULE ENGINE ── */
+function runEngine(){
+  const tasks=[...D.tasks.boxboyz,...D.tasks.personal];
+  const done=tasks.filter(t=>t.done).length;
+  const total=tasks.length;
+  const streak=D.profile.streak||0;
+  const notes=D.notes||[];
+  const sessions=D.sessions||[];
+  const lastSession=sessions.length?sessions[sessions.length-1]:null;
+  const daysSinceSession=lastSession?Math.floor((Date.now()-lastSession.ts)/864e5):999;
+  const answeredQs=Object.values(D.pq.ans||{}).filter(a=>a&&a.trim()).length;
+  const signals=[];
+
+  if(streak>=7)signals.push({p:10,mode:'ignite',text:'Seven days straight. You\'re building something real — consistency at this level is rarer than talent.'});
+  else if(streak>=3)signals.push({p:6,mode:'ignite',text:streak+'-day streak. The compound effect is starting. Keep the chain unbroken.'});
+  else if(streak===0)signals.push({p:9,mode:'recovery',text:'Fresh start. The only move that matters is the next one. What\'s the single most important thing you need to handle today?'});
+
+  if(total>0&&done/total<0.3&&total>=3)signals.push({p:8,mode:'realign',text:'You\'ve got '+total+' tasks but only '+done+' done. Pick the one that moves the needle most and ignore the rest until it\'s finished.'});
+  else if(total>0&&done/total>=0.8)signals.push({p:7,mode:'ignite',text:done+' of '+total+' tasks done. Strong execution day. Add one more ambitious task before you close out.'});
+
+  if(daysSinceSession>=7&&sessions.length>0)signals.push({p:9,mode:'realign',text:'You haven\'t recorded in '+daysSinceSession+' days. Your music isn\'t waiting for motivation — it\'s waiting for you to show up. Open a session tonight, even for 20 minutes.'});
+  else if(daysSinceSession>=3&&sessions.length>0)signals.push({p:6,mode:'realign',text:daysSinceSession+' days since your last session. Don\'t let the gap get bigger — use the flow ritual now.'});
+  else if(daysSinceSession===0&&sessions.length>0)signals.push({p:7,mode:'ignite',text:'You recorded today. That\'s the version of you that wins. Note what conditions made it happen.'});
+
+  const bbTasks=D.tasks.boxboyz.filter(t=>!t.done).length;
+  if(bbTasks>=5)signals.push({p:8,mode:'realign',text:bbTasks+' BoxBoyz tasks pending. You\'re carrying too much in your head. Let\'s triage — what are the 3 that move the brand forward this week?'});
+
+  if(notes.length===0)signals.push({p:5,mode:'brief',text:'Capture anything you\'ve been thinking about into Notes. Your best ideas disappear if you don\'t write them down.'});
+
+  if(signals.length===0)signals.push({p:1,mode:'brief',text:'All systems clear. Tell me what you\'re working on today and I\'ll help you make the most of it.'});
+
+  signals.sort((a,b)=>b.p-a.p);
+  return signals[0];
+}
+
+function renderBrief(){
+  const result=runEngine();
+  const card=document.getElementById('cypher-brief-card');
+  const msg=document.getElementById('brief-message');
+  const lbl=document.getElementById('brief-mode-label');
+  if(!card||!msg||!lbl)return;
+  const modes={
+    ignite:{icon:'ti-flame',label:'MOMENTUM',color:'var(--green)'},
+    realign:{icon:'ti-alert-triangle',label:'HEADS UP',color:'var(--gold)'},
+    recovery:{icon:'ti-heart',label:'RESET',color:'var(--purple)'},
+    brief:{icon:'ti-brain',label:'DAILY BRIEF',color:'var(--cyan)'}
+  };
+  const m=modes[result.mode]||modes.brief;
+  lbl.style.color=m.color;
+  lbl.innerHTML=`<i class="ti ${m.icon}" style="font-size:12px" aria-hidden="true"></i> ${m.label}`;
+  msg.textContent=result.text;
+}
+
+/* ── STATS & SCORE ── */
+function updateStats(){
+  document.getElementById('stat-streak').textContent=D.profile.streak||0;
+  const today=new Date().toDateString();
+  const doneTasks=[...D.tasks.boxboyz,...D.tasks.personal].filter(t=>t.done&&t.doneDate===today).length;
+  document.getElementById('stat-tasks').textContent=doneTasks;
+  document.getElementById('stat-notes').textContent=(D.notes||[]).length;
+  document.getElementById('ws-bb-count').textContent=(D.tasks.boxboyz||[]).filter(t=>!t.done).length+' tasks';
+  document.getElementById('ws-music-count').textContent=(D.sessions||[]).length+' sessions';
+  document.getElementById('ws-personal-count').textContent=(D.tasks.personal||[]).filter(t=>!t.done).length+' tasks';
+}
+
+function calcScore(){
+  const streak=Math.min(D.profile.streak||0,30);
+  const consistency=Math.round((streak/30)*100);
+  const tasks=[...D.tasks.boxboyz,...D.tasks.personal];
+  const done=tasks.filter(t=>t.done).length;
+  const execution=tasks.length?Math.min(Math.round((done/tasks.length)*100),100):0;
+  const answered=Object.values(D.pq.ans||{}).filter(a=>a&&a.trim()).length;
+  const selfKnow=Math.round((answered/10)*100);
+  const sessions=D.sessions||[];
+  const creative=Math.min(sessions.length*10,100);
+  const visionFilled=Object.values(D.vision||{}).filter(v=>v&&v.trim()).length;
+  const vision=Math.round((visionFilled/5)*100);
+  const total=Math.round((consistency*0.25)+(execution*0.25)+(selfKnow*0.2)+(creative*0.15)+(vision*0.15));
+  D.score={consistency,execution,self:selfKnow,creative,vision,total};
+  persist();
+}
+
+function renderScore(){
+  calcScore();
+  const s=D.score;
+  document.getElementById('score-ring-num').textContent=s.total;
+  const labels=['Just getting started','Building momentum','Finding your rhythm','Locked in','Operating at your best'];
+  const lbl=s.total<20?labels[0]:s.total<40?labels[1]:s.total<60?labels[2]:s.total<80?labels[3]:labels[4];
+  const scoreLabel=document.getElementById('score-label');
+  if(scoreLabel)scoreLabel.textContent=lbl;
+}
+
+function animateScore(){
+  const s=D.score;
+  const offset=100-(s.total);
+  const ringFill=document.getElementById('score-ring-fill');
+  if(ringFill)ringFill.style.strokeDashoffset=offset;
+  const bigRing=document.getElementById('score-big-ring');
+  if(bigRing)bigRing.style.strokeDashoffset=364.4-(364.4*(s.total/100));
+  const bigVal=document.getElementById('score-big-val');
+  if(bigVal)bigVal.textContent=s.total;
+  const fields={consistency:'sb-consistency,sv-consistency',execution:'sb-execution,sv-execution',self:'sb-self,sv-self',creative:'sb-creative,sv-creative',vision:'sb-vision,sv-vision'};
+  Object.entries(fields).forEach(([key,ids])=>{
+    const [barId,valId]=ids.split(',');
+    const bar=document.getElementById(barId);
+    const val=document.getElementById(valId);
+    if(bar)bar.style.width=s[key]+'%';
+    if(val)val.textContent=s[key];
+  });
+}
+
+/* ── TASKS ── */
+function addTask(ws){
+  const inp=document.getElementById(ws==='boxboyz'?'bb-task-inp':'personal-task-inp');
+  const val=inp.value.trim();if(!val)return;
+  if(!D.tasks[ws])D.tasks[ws]=[];
+  D.tasks[ws].push({id:Date.now(),text:val,done:false,tag:'today',created:Date.now()});
+  inp.value='';persist();renderTasks(ws);updateStats();checkStreak();persist();
+  showNotif('Cypher','Task added to '+ws+'. Stay on it.');
+}
+
+function renderTasks(ws){
+  const listId=ws==='boxboyz'?'bb-task-list':'personal-task-list';
+  const list=document.getElementById(listId);
+  if(!list)return;
+  list.innerHTML='';
+  const filter=taskFilters[ws]||'all';
+  const tasks=(D.tasks[ws]||[]).filter(t=>filter==='all'||t.tag===filter);
+  if(!tasks.length){list.innerHTML='<div class="empty-state"><i class="ti ti-check-circle" aria-hidden="true"></i>No tasks. Add one above.</div>';return;}
+  tasks.forEach((t)=>{
+    const realIdx=(D.tasks[ws]||[]).findIndex(x=>x.id===t.id);
+    const div=document.createElement('div');div.className='task-item';
+    div.innerHTML=`<div class="task-circle${t.done?' done':''}" onclick="toggleTask('${ws}',${realIdx})" aria-label="Toggle">${t.done?'<i class="ti ti-check" style="font-size:12px;color:#fff" aria-hidden="true"></i>':''}</div><div class="task-text${t.done?' done':''}">${t.text}</div><span class="task-tag tag-${t.tag||'today'}">${t.tag||'today'}</span><button class="del-btn" onclick="delTask('${ws}',${realIdx})" aria-label="Delete">×</button>`;
+    list.appendChild(div);
+  });
+  if(ws==='boxboyz')renderBBNotes();
+  if(ws==='personal')renderPersonalNotes();
+}
+
+function toggleTask(ws,i){
+  const today=new Date().toDateString();
+  D.tasks[ws][i].done=!D.tasks[ws][i].done;
+  if(D.tasks[ws][i].done)D.tasks[ws][i].doneDate=today;
+  persist();renderTasks(ws);updateStats();checkStreak();persist();
+  renderScore();
+}
+
+function delTask(ws,i){D.tasks[ws].splice(i,1);persist();renderTasks(ws);updateStats();}
+
+function filterTasks(ws,tag){
+  taskFilters[ws]=tag;
+  renderTasks(ws);
+}
+
+/* ── NOTES ── */
+function saveNote(text,ws){
+  const today=new Date().toDateString();
+  D.notes.push({id:Date.now(),text,ws:ws||'general',date:today,ts:Date.now()});
+  persist();updateStats();checkStreak();persist();renderAll();
+}
+
+function renderBBNotes(){
+  const list=document.getElementById('bb-notes-list');
+  if(!list)return;
+  const notes=(D.notes||[]).filter(n=>n.ws==='boxboyz').slice(-5).reverse();
+  list.innerHTML=notes.length?notes.map(n=>`<div class="note-card"><span class="note-ws-badge badge-boxboyz">BoxBoyz</span><div class="note-text">${n.text}</div><div class="note-time">${new Date(n.ts).toLocaleDateString()}</div></div>`).join(''):'<div class="empty-state"><i class="ti ti-note" aria-hidden="true"></i>No BoxBoyz notes yet.</div>';
+}
+
+function renderPersonalNotes(){
+  const list=document.getElementById('personal-notes-list');
+  if(!list)return;
+  const notes=(D.notes||[]).filter(n=>n.ws==='personal').slice(-5).reverse();
+  list.innerHTML=notes.length?notes.map(n=>`<div class="note-card"><span class="note-ws-badge badge-personal">Personal</span><div class="note-text">${n.text}</div><div class="note-time">${new Date(n.ts).toLocaleDateString()}</div></div>`).join(''):'<div class="empty-state"><i class="ti ti-note" aria-hidden="true"></i>No personal notes yet.</div>';
+}
+
+function renderAllNotes(){
+  const list=document.getElementById('all-notes-list');
+  if(!list)return;
+  const filtered=(D.notes||[]).filter(n=>noteFilter==='all'||n.ws===noteFilter).slice().reverse();
+  list.innerHTML=filtered.length?filtered.map(n=>`<div class="note-card"><span class="note-ws-badge badge-${n.ws||'general'}">${n.ws||'general'}</span><div class="note-text">${n.text}</div><div class="note-time">${new Date(n.ts).toLocaleDateString()}</div></div>`).join(''):'<div class="empty-state"><i class="ti ti-note" aria-hidden="true"></i>No notes yet. Capture something.</div>';
+}
+
+function filterNotes(ws){
+  noteFilter=ws;
+  document.querySelectorAll('#view-notes .tag-pill').forEach(p=>p.classList.remove('active'));
+  event.target.classList.add('active');
+  renderAllNotes();
+}
+
+function renderAll(){renderAllNotes();renderBBNotes();renderPersonalNotes();renderRemindersDue();}
+
+/* ── QUICK CAPTURE ── */
+function quickCapture(){
+  const inp=document.getElementById('home-capture');
+  const val=inp.value.trim();if(!val)return;
+  inp.value='';
+  const ws=classifyCapture(val);
+  if(ws==='task_bb'){D.tasks.boxboyz.push({id:Date.now(),text:val,done:false,tag:'today',created:Date.now()});persist();}
+  else if(ws==='task_personal'){D.tasks.personal.push({id:Date.now(),text:val,done:false,tag:'today',created:Date.now()});persist();}
+  else{saveNote(val,ws);}
+  updateStats();checkStreak();persist();
+  showNotif('Cypher','Got it — saved to '+(ws==='task_bb'?'BoxBoyz tasks':ws==='task_personal'?'personal tasks':ws+' notes')+'.');
+  if(val.toLowerCase().includes('?')||val.length>60){showView('cypher');setTimeout(()=>sendChatMessage(val),300);}
+}
+
+function classifyCapture(text){
+  const t=text.toLowerCase();
+  if(t.includes('boxboy')||t.includes('brand')||t.includes('team')||t.includes('merch')||t.includes('drop'))return'task_bb';
+  if(t.includes('music')||t.includes('record')||t.includes('track')||t.includes('lyric')||t.includes('beat'))return'music';
+  if(t.includes('remind')||t.includes('don\'t forget')||t.includes('remember'))return'personal';
+  if(t.startsWith('note:')||t.startsWith('idea:'))return'general';
+  return'general';
+}
+
+/* ── CYPHER CHAT ── */
+function addMsgToDOM(role,content,save=true){
+  const msgs=document.getElementById('chat-messages');
+  if(!msgs)return;
+  const div=document.createElement('div');
+  div.className='msg '+(role==='cypher'?'cypher':role==='system'?'system':'user');
+  if(role==='cypher')div.innerHTML=`<div class="msg-name">CYPHER</div>${content.replace(/\n/g,'<br>')}`;
+  else div.textContent=content;
+  msgs.appendChild(div);
+  setTimeout(()=>{const s=document.getElementById('chat-scroll');if(s)s.scrollTop=s.scrollHeight;},50);
+  if(save){
+    if(!D.profile.chatHistory)D.profile.chatHistory=[];
+    D.profile.chatHistory.push({role,content,ts:Date.now()});
+    if(D.profile.chatHistory.length>100)D.profile.chatHistory=D.profile.chatHistory.slice(-80);
+    persist();
+  }
+}
+
+function addCypherMessage(text,save=true){addMsgToDOM('cypher',text,save);}
+
+function showTyping(){
+  const msgs=document.getElementById('chat-messages');
+  if(!msgs)return null;
+  const div=document.createElement('div');
+  div.className='msg cypher';div.id='typing-indicator';
+  div.innerHTML=`<div class="msg-name">CYPHER</div><div class="typing-dots"><span></span><span></span><span></span></div>`;
+  msgs.appendChild(div);
+  const s=document.getElementById('chat-scroll');if(s)s.scrollTop=s.scrollHeight;
+  return div;
+}
+
+function removeTyping(){const t=document.getElementById('typing-indicator');if(t)t.remove();}
+
+async function sendChat(){
+  const inp=document.getElementById('chat-input');
+  const val=inp.value.trim();if(!val)return;
+  inp.value='';inp.style.height='auto';
+  sendChatMessage(val);
+}
+
+async function sendChatMessage(text){
+  addMsgToDOM('user',text);
+  const typing=showTyping();
+  const key=getKey();
+
+  // Search files if query looks file-related
+  let fileCtx=null;
+  if(shouldSearchFiles(text)){
+    fileCtx=await searchFilesForContext(text);
+    if(fileCtx)addMsgToDOM('system','Cypher searched your C:\\AI files...',false);
+  }
+
+  if(!key){
+    removeTyping();
+    const response=localCypherResponse(text);
+    addCypherMessage(response);
+    return;
+  }
+  try{
+    const profile=buildProfileContext();
+    const systemPrompt=`You are Cypher — the intelligent core of CTRL/ALT/DEFEAT, a personal life operating system. You are speaking to your user directly.
+
+Your personality: Direct, warm, intelligent. You speak like a brilliant best friend who also happens to have the knowledge of a business strategist, life coach, creative director, and systems thinker. You are never generic. You always tie responses to the user's actual situation.
+
+What you know about this user:
+${profile}${fileCtx?'\n\n'+fileCtx:''}
+
+Your response rules:
+- Never more than 3-4 short paragraphs unless a plan is needed
+- Always end with one concrete action the user can take RIGHT NOW
+- When they have a problem: diagnose it, then prescribe something specific
+- When they need a plan: give a numbered list of real actions, not advice
+- Speak like a person, not an assistant
+- You remember everything they've told you across this conversation
+- You care about this person's actual success, not just making them feel good`;
+
+    const messages=[];
+    const history=(D.profile.chatHistory||[]).slice(-20);
+    history.forEach(m=>{if(m.role==='user'||m.role==='cypher')messages.push({role:m.role==='cypher'?'assistant':'user',content:m.content});});
+    messages.push({role:'user',content:text});
+
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,system:systemPrompt,messages})
+    });
+    const data=await res.json();
+    removeTyping();
+    const reply=data.content&&data.content[0]?data.content[0].text:'I\'m having trouble connecting right now. Check your API key in settings.';
+    addCypherMessage(reply);
+    learnFromConversation(text,reply);
+  }catch(e){
+    removeTyping();
+    addCypherMessage(localCypherResponse(text));
+  }
+}
+
+function localCypherResponse(text){
+  const t=text.toLowerCase();
+  if(t.includes('boxboy'))return'BoxBoyz is your main creative and business vehicle right now. The biggest challenge for a brand at your stage isn\'t ideas — it\'s prioritization. Open your BoxBoyz workspace and tell me: what are the 3 things that would move the brand most this week? We\'ll build from there.';
+  if(t.includes('music')||t.includes('record')||t.includes('creat'))return'The reason music feels forced right now isn\'t lack of talent — it\'s the absence of ritual. Your brain needs a consistent on-ramp into flow. Try the ritual in your Music tab before your next session. The 60-second freestyle at step 3 is the key — it breaks the perfectionism freeze. When can you open a session?';
+  if(t.includes('overwhelm')||t.includes('too much')||t.includes('stress'))return'You\'re carrying too many open loops in your head. That\'s what overwhelm actually is — not too much work, but too much unprocessed work. Let\'s do a brain dump: tell me everything that\'s sitting in your head right now, and I\'ll help you sort it into what matters today, this week, and later.';
+  if(t.includes('motivat'))return'Motivation follows action, not the other way around. You don\'t wait to feel ready — you start, and the feeling catches up. Pick the smallest possible version of the thing you\'re avoiding and do just that. What\'s the one thing you\'ve been putting off?';
+  if(t.includes('focus')||t.includes('distract'))return'Focus is a resource you protect, not a willpower you summon. The question isn\'t "how do I focus?" — it\'s "what am I protecting my focus from?" Name the distraction that\'s pulling you most right now and we\'ll build a wall around it.';
+  return'I hear you. Break this down for me — what\'s the core of what you\'re trying to solve or achieve? The more specific you are, the more specific I can be. I don\'t do generic advice.';
+}
+
+function learnFromConversation(userMsg,cypherReply){
+  const t=userMsg.toLowerCase();
+  if(t.includes('boxboy')&&!D.profile.knowsBoxboyz){D.profile.knowsBoxboyz=true;}
+  if(t.includes('music')||t.includes('record')){D.profile.isMusician=true;}
+  if(t.includes('leader')||t.includes('founder')||t.includes('manage')){D.profile.isFounder=true;}
+  persist();
+}
+
+function buildProfileContext(){
+  const streak=D.profile.streak||0;
+  const bbTasks=D.tasks.boxboyz||[];
+  const sessions=D.sessions||[];
+  const notes=D.notes||[];
+  const score=D.score||{};
+  const lastSession=sessions.length?sessions[sessions.length-1]:null;
+  const daysSinceSession=lastSession?Math.floor((Date.now()-lastSession.ts)/864e5):null;
+  return`- Running BoxBoyz brand (creative/business, sole manager with co-founder)
+- Makes music, wants to recapture flow state and creative motivation
+- ${streak}-day streak on the app
+- ${bbTasks.filter(t=>!t.done).length} open BoxBoyz tasks, ${bbTasks.filter(t=>t.done).length} completed
+- ${sessions.length} music sessions logged${daysSinceSession!==null?', last session '+daysSinceSession+' days ago':''}
+- ${notes.length} notes captured
+- Life score: ${score.total||0}/100
+- In a personal identity shift — becoming a leader of himself and his goals
+- Learns better through experience than study
+- Needs a system that manages multiple life domains simultaneously
+- Key challenges: overwhelm as sole manager, music motivation, daily life management, identity shift`;
+}
+
+function askCypherAbout(topic){
+  const prompts={
+    boxboyz:'Looking at my BoxBoyz workspace — what patterns do you see in my tasks and notes? What should I focus on this week and what am I missing?',
+    music:'Looking at my music sessions and patterns — what do you notice? How do I get back into consistent creative flow?'
+  };
+  showView('cypher');
+  setTimeout(()=>sendChatMessage(prompts[topic]||'Help me with '+topic),300);
+}
+
+function triggerCypherScoreAnalysis(){
+  sendChatMessage('Analyze my life score breakdown and tell me exactly what I should focus on to improve it. Be specific about what actions move each category.');
+}
+
+/* ── MUSIC SESSIONS ── */
+let sessionMood=null;
+function setMood(mood){
+  sessionMood=mood;
+  ['great','good','meh','block'].forEach(m=>{const b=document.getElementById('mood-'+m);if(b)b.className='type-btn'+(m===mood?' active':'');});
+}
+
+function logSession(){
+  const note=document.getElementById('session-note-inp').value.trim();
+  if(!note&&!sessionMood){showNotif('Cypher','Add a note or mood before logging.');return;}
+  const moodEmoji={great:'🔥',good:'✓',meh:'〜',block:'✗'}[sessionMood]||'🎵';
+  D.sessions.push({id:Date.now(),note,mood:sessionMood,moodEmoji,ts:Date.now()});
+  document.getElementById('session-note-inp').value='';sessionMood=null;
+  ['great','good','meh','block'].forEach(m=>{const b=document.getElementById('mood-'+m);if(b)b.className='type-btn';});
+  persist();renderMusicView();updateStats();renderScore();
+  showNotif('Cypher','Session logged. Cypher is learning your creative patterns.');
+}
+
+function startFlowSession(){
+  openModal('flow-timer');
+}
+
+function renderMusicView(){
+  const list=document.getElementById('session-history');
+  if(!list)return;
+  const sessions=(D.sessions||[]).slice().reverse().slice(0,10);
+  list.innerHTML=sessions.length?sessions.map(s=>`<div class="session-card"><div class="session-card-hdr"><div class="session-date">${new Date(s.ts).toLocaleDateString()}</div><div class="session-mood">${s.moodEmoji||'🎵'}</div></div><div class="session-note">${s.note||'Session logged.'}</div></div>`).join(''):'<div class="empty-state"><i class="ti ti-music" aria-hidden="true"></i>No sessions yet. Start with the ritual above.</div>';
+}
+
+/* ── TIMER ── */
+function startTimer(secs){
+  if(timerInterval)clearInterval(timerInterval);
+  timerSeconds=secs;timerRunning=true;
+  updateTimerDisplay();
+  timerInterval=setInterval(()=>{
+    timerSeconds--;
+    updateTimerDisplay();
+    if(timerSeconds<=0){
+      clearInterval(timerInterval);timerInterval=null;timerRunning=false;
+      showNotif('Cypher','Timer complete. How did it go?');
+      try{navigator.vibrate&&navigator.vibrate([200,100,200]);}catch(e){}
+    }
+  },1000);
+}
+
+function stopTimer(){clearInterval(timerInterval);timerInterval=null;timerRunning=false;timerSeconds=0;updateTimerDisplay();}
+
+function updateTimerDisplay(){
+  const m=Math.floor(timerSeconds/60),s=timerSeconds%60;
+  const el=document.getElementById('timer-display-val');
+  if(el)el.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+}
+
+/* ── REMINDERS ── */
+function addReminder(text,time){
+  const normalized=time.length===4?'0'+time:time;
+  D.reminders.push({id:Date.now(),text,time:normalized,done:false});
+  persist();renderReminders();showNotif('Cypher','Reminder set for '+normalized+'.');
+}
+
+function checkReminders(){
+  const now=new Date();
+  const h=now.getHours(),m=now.getMinutes();
+  const timeStr=(h<10?'0':'')+h+':'+(m<10?'0':'')+m;
+  const due=(D.reminders||[]).filter(r=>!r.done&&r.time===timeStr);
+  due.forEach(r=>{showNotif('Reminder',r.text);r.done=true;});
+  if(due.length)persist();
+  renderRemindersDue();
+}
+
+function renderRemindersDue(){
+  const upcoming=(D.reminders||[]).filter(r=>!r.done).slice(0,3);
+  const section=document.getElementById('reminders-due-section');
+  const list=document.getElementById('reminders-due-list');
+  if(!section||!list)return;
+  if(upcoming.length===0){section.style.display='none';return;}
+  section.style.display='block';
+  list.innerHTML=upcoming.map(r=>`<div class="reminder-item"><div class="reminder-icon"><i class="ti ti-bell" aria-hidden="true"></i></div><div class="reminder-content"><div class="reminder-text">${r.text}</div><div class="reminder-time">${r.time}</div></div><button class="del-btn" onclick="dismissReminder(${r.id})" aria-label="Dismiss">×</button></div>`).join('');
+}
+
+function dismissReminder(id){
+  const r=D.reminders.find(x=>x.id===id);
+  if(r)r.done=true;
+  persist();renderRemindersDue();
+}
+
+function renderReminders(){renderRemindersDue();}
+
+/* ── MODALS ── */
+function openModal(type){
+  const overlay=document.getElementById('modal-overlay');
+  const content=document.getElementById('modal-content');
+  overlay.classList.add('open');
+  if(type==='timer'){
+    content.innerHTML=`<div class="modal-handle"></div><div class="modal-title">Timer</div><div class="timer-display"><div class="timer-time" id="timer-display-val">00:00</div><div class="timer-label" id="timer-label-text">Set a timer</div></div><div class="preset-grid"><div class="preset-btn" onclick="startTimer(300);document.getElementById('timer-label-text').textContent='5 min focus'">5 min</div><div class="preset-btn" onclick="startTimer(900);document.getElementById('timer-label-text').textContent='15 min focus'">15 min</div><div class="preset-btn" onclick="startTimer(1500);document.getElementById('timer-label-text').textContent='25 min session'">25 min</div><div class="preset-btn" onclick="startTimer(3600);document.getElementById('timer-label-text').textContent='1 hour deep work'">60 min</div></div><div class="timer-btns"><button class="timer-btn start" onclick="if(!timerRunning)startTimer(timerSeconds||1500)">Start</button><button class="timer-btn stop" onclick="stopTimer()">Stop</button></div><button class="modal-btn secondary" style="margin-top:16px" onclick="closeModalForce()">Close</button>`;
+    timerSeconds=timerRunning?timerSeconds:0;updateTimerDisplay();
+  } else if(type==='reminder'){
+    content.innerHTML=`<div class="modal-handle"></div><div class="modal-title">Set a reminder</div><input class="modal-input" id="reminder-text-inp" placeholder="Remind me to..." maxlength="80"><input class="modal-input" type="time" id="reminder-time-inp" style="color-scheme:dark"><button class="modal-btn" onclick="const t=document.getElementById('reminder-text-inp').value.trim();const ti=document.getElementById('reminder-time-inp').value;if(t&&ti){addReminder(t,ti);closeModalForce();}else{showNotif('Cypher','Fill in both the reminder text and time.');}">Set reminder</button><button class="modal-btn secondary" onclick="closeModalForce()">Cancel</button>`;
+  } else if(type==='capture'){
+    content.innerHTML=`<div class="modal-handle"></div><div class="modal-title">Capture a note</div><div class="type-grid"><button class="type-btn active" id="ct-general" onclick="setCaptureType('general')">General</button><button class="type-btn" id="ct-boxboyz" onclick="setCaptureType('boxboyz')">BoxBoyz</button><button class="type-btn" id="ct-music" onclick="setCaptureType('music')">Music</button></div><textarea class="modal-input" id="capture-note-inp" placeholder="Write anything..." style="min-height:100px;resize:none;line-height:1.5"></textarea><button class="modal-btn" onclick="const v=document.getElementById('capture-note-inp').value.trim();if(v){saveNote(v,currentCaptureType||'general');showNotif('Cypher','Saved.');closeModalForce();}else{showNotif('Cypher','Write something first.');}">Save note</button><button class="modal-btn secondary" onclick="closeModalForce()">Cancel</button>`;
+  } else if(type==='flow-timer'){
+    content.innerHTML=`<div class="modal-handle"></div><div class="modal-title">Flow session timer</div><div class="timer-display"><div class="timer-time" id="timer-display-val">25:00</div><div class="timer-label">Focus. Create. Don't stop.</div></div><div class="timer-btns"><button class="timer-btn start" onclick="startTimer(1500)">Start 25 min</button><button class="timer-btn stop" onclick="stopTimer()">Stop</button></div><button class="modal-btn secondary" style="margin-top:16px" onclick="closeModalForce()">Close</button>`;
+    if(!timerRunning){timerSeconds=1500;}updateTimerDisplay();
+  }
+}
+
+let currentCaptureType='general';
+function setCaptureType(type){
+  currentCaptureType=type;
+  ['general','boxboyz','music'].forEach(t=>{const b=document.getElementById('ct-'+t);if(b)b.className='type-btn'+(t===type?' active':'');});
+}
+
+function closeModal(e){
+  if(e&&e.target!==document.getElementById('modal-overlay')&&e.target!==document.getElementById('modal-content').parentElement)return;
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+function closeModalForce(){
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function toggleSection(id){
+  const el=document.getElementById(id);
+  if(el)el.style.display=el.style.display==='none'?'block':'none';
+}
+
+/* ── NOTIFICATIONS ── */
+let notifTimeout=null;
+function showNotif(title,body){
+  const n=document.getElementById('notification');
+  document.getElementById('notif-title').textContent=title;
+  document.getElementById('notif-body').textContent=body;
+  n.classList.add('show');
+  if(notifTimeout)clearTimeout(notifTimeout);
+  notifTimeout=setTimeout(()=>n.classList.remove('show'),4000);
+}
+
+/* ── MISC ── */
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,120)+'px';}
+
+function exportData(){
+  try{
+    const blob=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download='cad-data.json';a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    showNotif('Cypher','Data exported successfully.');
+  }catch(e){showNotif('Error','Could not export data.');}
+}
+
+/* ═══════════════════════════════════════
+   BRIDGE — settings, connection, file search
+═══════════════════════════════════════ */
+function getBridgeURL(){return localStorage.getItem('cad_bridge_url')||'';}
+function getBridgeToken(){return localStorage.getItem('cad_bridge_token')||'';}
+function saveBridgeSettings(){
+  const url=document.getElementById('bridge-url-inp').value.trim();
+  const token=document.getElementById('bridge-token-inp').value.trim();
+  if(url)localStorage.setItem('cad_bridge_url',url);else localStorage.removeItem('cad_bridge_url');
+  if(token)localStorage.setItem('cad_bridge_token',token);else localStorage.removeItem('cad_bridge_token');
+}
+
+function loadBridgeSettings(){
+  const urlInp=document.getElementById('bridge-url-inp');
+  const tokenInp=document.getElementById('bridge-token-inp');
+  if(urlInp)urlInp.value=getBridgeURL();
+  if(tokenInp)tokenInp.value=getBridgeToken();
+}
+
+async function bridgeCall(endpoint,method,body){
+  const url=getBridgeURL();
+  const token=getBridgeToken();
+  if(!url||!token)return null;
+  try{
+    const opts={method:method||'GET',headers:{'X-Cypher-Token':token,'Content-Type':'application/json'}};
+    if(body)opts.body=JSON.stringify(body);
+    const res=await fetch(url+endpoint,opts);
+    if(!res.ok)return null;
+    return await res.json();
+  }catch(e){return null;}
+}
+
+async function testBridgeConnection(){
+  const dot=document.getElementById('bridge-status-dot');
+  const lbl=document.getElementById('bridge-status-label');
+  if(dot)dot.style.background='var(--amber)';
+  if(lbl)lbl.textContent='Testing...';
+  const url=getBridgeURL();
+  const token=getBridgeToken();
+  if(!url||!token){
+    if(dot)dot.style.background='var(--text3)';
+    if(lbl)lbl.textContent='Enter URL and token first';
+    showNotif('Cypher','Enter your bridge URL and token first.');
+    return;
+  }
+  try{
+    const res=await fetch(url+'/ping',{headers:{'X-Cypher-Token':token}});
+    if(res.ok){
+      const data=await res.json();
+      if(dot)dot.style.background='var(--green)';
+      if(lbl)lbl.textContent='Connected \u2713 — '+data.files_indexed+' files indexed';
+      localStorage.setItem('cad_bridge_online','1');
+      showNotif('Cypher','Bridge connected. '+data.files_indexed+' files ready.');
+    } else {
+      throw new Error('bad response');
+    }
+  }catch(e){
+    if(dot)dot.style.background='var(--red)';
+    if(lbl)lbl.textContent='Cannot reach bridge';
+    localStorage.removeItem('cad_bridge_online');
+    showNotif('Cypher','Cannot reach the bridge. Check your Tailscale IP and token.');
+  }
+}
+
+async function indexFiles(){
+  const btn=document.getElementById('index-btn');
+  if(btn)btn.textContent='Indexing...';
+  const data=await bridgeCall('/index','POST',{});
+  if(data){
+    showNotif('Cypher','Indexing started. Give it 30-60 seconds to read your files.');
+    setTimeout(()=>{if(btn)btn.textContent='Index my files';},3000);
+  } else {
+    showNotif('Cypher','Bridge not reachable. Test connection first.');
+    if(btn)btn.textContent='Index my files';
+  }
+}
+
+async function searchFilesForContext(query){
+  const data=await bridgeCall('/search','POST',{query});
+  if(!data||!data.results||!data.results.length)return null;
+  const lines=['[File context from your C:\\AI folder:]'];
+  data.results.slice(0,4).forEach(r=>{
+    lines.push('Found in '+r.path+': "'+r.excerpt.slice(0,200)+'"');
+  });
+  return lines.join('\n');
+}
+
+function shouldSearchFiles(text){
+  const t=text.toLowerCase();
+  const triggers=['find','search','look in','what\'s in','check my files','in my files',
+    'my project','my notes','my folder','what did i','show me my','open my','read my',
+    'boxboyz folder','music folder','ai folder','what have i','what do i have'];
+  return triggers.some(tr=>t.includes(tr));
+}
+
+/* ═══════════════════════════════════════
+   VOICE MODE
+═══════════════════════════════════════ */
+let voiceMode=false;
+let mediaRecorder=null;
+let audioChunks=[];
+let speechRecognition=null;
+
+function toggleVoiceMode(){
+  voiceMode=!voiceMode;
+  const textWrap=document.getElementById('text-input-wrap');
+  const voiceWrap=document.getElementById('voice-input-wrap');
+  if(voiceMode){
+    if(textWrap)textWrap.style.display='none';
+    if(voiceWrap)voiceWrap.style.display='block';
+    showNotif('Cypher','Voice mode on. Hold the button to speak.');
+  } else {
+    if(textWrap)textWrap.style.display='block';
+    if(voiceWrap)voiceWrap.style.display='none';
+    stopRecording();
+  }
+}
+
+async function startRecording(e){
+  if(e)e.preventDefault();
+  const btn=document.getElementById('mic-btn');
+  const status=document.getElementById('mic-status');
+  const icon=document.getElementById('mic-icon');
+  if(btn){btn.style.background='var(--gold)';btn.style.borderColor='var(--gold)';}
+  if(icon)icon.style.color='var(--bg)';
+  if(status)status.textContent='LISTENING...';
+
+  const bridgeUrl=getBridgeURL();
+  const bridgeToken=getBridgeToken();
+
+  if(bridgeUrl&&bridgeToken){
+    // Use MediaRecorder → send to Whisper on bridge
+    try{
+      const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+      audioChunks=[];
+      mediaRecorder=new MediaRecorder(stream);
+      mediaRecorder.ondataavailable=e=>audioChunks.push(e.data);
+      mediaRecorder.start();
+    }catch(err){
+      // Fallback to Web Speech API
+      startWebSpeech();
+    }
+  } else {
+    // No bridge — use Web Speech API directly
+    startWebSpeech();
+  }
+}
+
+async function stopRecording(e){
+  if(e)e.preventDefault();
+  const btn=document.getElementById('mic-btn');
+  const status=document.getElementById('mic-status');
+  const icon=document.getElementById('mic-icon');
+  if(btn){btn.style.background='var(--bg2)';btn.style.borderColor='var(--border2)';}
+  if(icon)icon.style.color='var(--text3)';
+  if(status)status.textContent='PROCESSING...';
+
+  if(mediaRecorder&&mediaRecorder.state!=='inactive'){
+    mediaRecorder.onstop=async()=>{
+      const blob=new Blob(audioChunks,{type:'audio/webm'});
+      const text=await transcribeWithBridge(blob);
+      if(text&&text.trim()){
+        if(status)status.textContent='HOLD TO SPEAK';
+        await sendVoiceMessage(text);
+      } else {
+        if(status)status.textContent='HOLD TO SPEAK';
+        showNotif('Cypher','Didn\'t catch that. Try again.');
+      }
+      mediaRecorder.stream.getTracks().forEach(t=>t.stop());
+    };
+    mediaRecorder.stop();
+  } else {
+    if(status)status.textContent='HOLD TO SPEAK';
+  }
+}
+
+async function transcribeWithBridge(blob){
+  const url=getBridgeURL();
+  const token=getBridgeToken();
+  if(!url||!token)return null;
+  try{
+    const formData=new FormData();
+    formData.append('audio',blob,'recording.webm');
+    const res=await fetch(url+'/transcribe',{method:'POST',headers:{'X-Cypher-Token':token},body:formData});
+    if(res.ok){const data=await res.json();return data.text||null;}
+  }catch(e){}
+  return null;
+}
+
+function startWebSpeech(){
+  if(!('webkitSpeechRecognition' in window)&&!('SpeechRecognition' in window)){
+    showNotif('Cypher','Voice not supported in this browser. Use Safari on iOS or Chrome.');
+    return;
+  }
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  speechRecognition=new SR();
+  speechRecognition.continuous=false;
+  speechRecognition.interimResults=false;
+  speechRecognition.lang='en-US';
+  speechRecognition.onresult=async(e)=>{
+    const text=e.results[0][0].transcript;
+    const status=document.getElementById('mic-status');
+    if(status)status.textContent='HOLD TO SPEAK';
+    if(text)await sendVoiceMessage(text);
+  };
+  speechRecognition.onerror=()=>{
+    const status=document.getElementById('mic-status');
+    if(status)status.textContent='HOLD TO SPEAK';
+  };
+  speechRecognition.start();
+}
+
+async function sendVoiceMessage(text){
+  // Show what was heard
+  addMsgToDOM('user',text);
+  const typing=showTyping();
+  const key=getKey();
+  let reply='';
+
+  if(key){
+    try{
+      const profile=buildProfileContext();
+      const fileCtx=shouldSearchFiles(text)?await searchFilesForContext(text):null;
+      const systemPrompt=`You are Cypher — voice mode. Keep responses SHORT — max 2-3 sentences. No markdown, no bullet points, no asterisks. Speak naturally like Johnny Silverhand — direct, cool, confident. Never generic. Always tied to this person's real situation.\n\nUser profile:\n${profile}${fileCtx?'\n\n'+fileCtx:''}`;
+      const res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,system:systemPrompt,messages:[{role:'user',content:text}]})
+      });
+      const data=await res.json();
+      reply=data.content&&data.content[0]?data.content[0].text:localCypherResponse(text);
+    }catch(e){reply=localCypherResponse(text);}
+  } else {
+    reply=localCypherResponse(text);
+  }
+
+  removeTyping();
+  addCypherMessage(reply);
+  speakResponse(reply);
+}
+
+async function speakResponse(text){
+  // Try bridge TTS first (Johnny Silverhand voice)
+  const url=getBridgeURL();
+  const token=getBridgeToken();
+  if(url&&token){
+    try{
+      const res=await fetch(url+'/tts',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-Cypher-Token':token},
+        body:JSON.stringify({text})
+      });
+      if(res.ok){
+        const blob=await res.blob();
+        const audioUrl=URL.createObjectURL(blob);
+        const audio=new Audio(audioUrl);
+        audio.onended=()=>URL.revokeObjectURL(audioUrl);
+        audio.play();
+        return;
+      }
+    }catch(e){}
+  }
+  // Fallback: browser speech synthesis
+  if('speechSynthesis' in window){
+    const utt=new SpeechSynthesisUtterance(text);
+    utt.rate=0.9;utt.pitch=0.8;utt.volume=1;
+    // Try to pick a deep male voice
+    const voices=speechSynthesis.getVoices();
+    const male=voices.find(v=>v.name.toLowerCase().includes('male')||v.name.toLowerCase().includes('daniel')||v.name.toLowerCase().includes('alex'));
+    if(male)utt.voice=male;
+    speechSynthesis.speak(utt);
+  }
+}
+
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').catch(()=>{});}
+window.addEventListener('load',boot);
+</script>
+</body>
+</html>
